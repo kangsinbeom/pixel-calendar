@@ -1,24 +1,43 @@
-interface CalendarInfo {
-  year: number;
-  month: number;
-}
+import { getNowDate } from "./getNowDate";
+import { DateInfo } from "./type";
 
-export const getCalendarInfo = ({ year, month }: CalendarInfo): number[] => {
+export const getCalendarInfo = (): DateInfo[] => {
+  const currentDate = new Date();
+  const { year, month } = getNowDate(currentDate);
   const startWeek = new Date(year, month, 1).getDay();
   const lastWeek = new Date(year, month + 1, 0).getDay();
   const totalDay = new Date(year, month + 1, 0).getDate();
-  const prevMonthTotalDay = new Date(year, month, 0).getDate();
-  const prevCalendar = Array.from(
-    { length: startWeek },
-    (_, index) => prevMonthTotalDay - index,
+
+  const currentMonth = Array.from(
+    {
+      length: totalDay,
+    },
+    (_, index) => {
+      const date = new Date(year, month, 1);
+      date.setDate(date.getDate() + index);
+      return { date };
+    },
+  );
+  const prevMonth = Array.from(
+    {
+      length: startWeek + 14,
+    },
+    (_, index) => {
+      const date = new Date(year, month, 0);
+      date.setDate(date.getDate() - index);
+      return { date };
+    },
   ).reverse();
-  const currentCalendar = Array.from(
-    { length: totalDay },
-    (_, index) => index + 1,
+
+  const nextMonth = Array.from(
+    {
+      length: 6 - lastWeek + 14,
+    },
+    (_, index) => {
+      const date = new Date(year, month + 1, 1);
+      date.setDate(date.getDate() + index);
+      return { date };
+    },
   );
-  const nextCalendar = Array.from(
-    { length: 7 - (lastWeek + 1) },
-    (_, index) => index + 1,
-  );
-  return [...prevCalendar, ...currentCalendar, ...nextCalendar];
+  return [...prevMonth, ...currentMonth, ...nextMonth];
 };
